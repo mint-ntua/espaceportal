@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!-- meta-->
+		<title>WITH</title>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="description" content="WITH">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#454545">
+
+		<!-- icons-->
+		<link rel="apple-touch-icon" href="apple-touch-icon.png">
+		<link rel="icon" type="image/png" href="favicon.png">
+		<meta name="msapplication-TileImage" content="tile.png">
+		<meta name="msapplication-TileColor" content="#d83434">
+
+		<!-- stylesheets-->
+		<link rel="stylesheet" href="css/main.min.css">
+		<link rel="stylesheet" href="css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
+
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="css/slick.css">
+		<link rel="stylesheet" href="bower_modules/magnific-popup/dist/magnific-popup.css">
+		<link rel="stylesheet" type="text/css" href="bower_modules/smoke/dist/css/smoke.min.css">
+		<link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
+		<link rel="stylesheet" type="text/css" href="css/horizBarChart.css">
+		<link rel="stylesheet" type="text/css" href="css/facets.css">
+		<link rel="stylesheet" type="text/css" href="css/annotate.css">
+		<link rel="stylesheet" href="css/slick.css">
+		<link rel="stylesheet" type="text/css" href="bower_modules/magnific-popup/dist/magnific-popup.css">
+		
+		<link rel="stylesheet" href="css/thesaurustree.css">
+
+
+		<!-- build:js -->
+		<script src="js/app/require.config.js"></script>
+		<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
+
+	</head>
+	<body data-page="default">
+    <!-- header-->
+    <header>
+
+     <top-bar params="route: route"></top-bar>
+
+
+    </header>
+    <!-- main-->
+
+     
+    <!-- ko if:showSearch()==false --> 
+	<!-- ko component: {
+    name: $data.route().page,
+    params: $data.route()
+	} -->
+	<!-- /ko -->
+    <!-- /ko -->
+    
+     <search-page params="route: route" data-bind="visible: showSearch()==true"></search-page>
+    
+
+     <div id="fb-root"></div>
+
+   <script src="js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

@@ -1,0 +1,268 @@
+package general.controllerTest;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.GET;
+import static play.test.Helpers.POST;
+import static play.test.Helpers.contentAsString;
+import static play.test.Helpers.fakeApplication;
+import static play.test.Helpers.fakeRequest;
+import static play.test.Helpers.route;
+import static play.test.Helpers.running;
+import static play.test.Helpers.status;
+import general.TestUtils;
+import general.daoTests.UserDAOTest;
+import general.daoTests.UserGroupDAOTest;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+
+import org.bson.types.ObjectId;
+import org.junit.Assert;
+import org.junit.Test;
+
+import play.libs.Json;
+import play.mvc.Result;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import db.DB;
+
+/**
+ * The class <code>GroupManagerTest</code> contains tests for the class {@link <code>GroupManager</code>}
+ *
+ * @pattern JUnit Test Case
+ *
+ * @generatedBy CodePro at 9/23/15 12:07 PM
+ *
+ * @author mariaral
+ *
+ * @version $Revision$
+ */
+public class GroupManagerTest {
+
+	/**
+	 * Run the Result createGroup(String, String, String) method test
+	 */
+	@Test
+	public void testCreateGroup() {
+
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				final ObjectNode json = Json.newObject();
+				final ObjectNode page = Json.newObject();
+				User user = new User();
+				user.setEmail("testuser@test.gr");
+				user.setFirstName("FirstName");
+				user.setLastName("LastName");
+				user.setUsername("usrname");
+				DB.getUserDAO().makePermanent(user);
+				// Create Organization
+				json.put("username", "testGroup" +Math.random());
+				json.put("description", "This is a test group");
+				page.put("address", "Hrwwn Polutexneiou 2, Zwgrafou");
+				page.put("city", "Athens");
+				page.put("country", "Greece");
+				json.put("page", page);
+				Result result = route(fakeRequest("POST",
+						"/organization/create").withJsonBody(json).withSession(
+						"user", user.getDbId().toString()));
+				// Create Project
+				System.out.println(contentAsString(result));
+				json.put("username", "testGroup" + Math.random());
+				json.put("description", "This is a test group");
+				page.put("address", "Hrwwn Polutexneiou 2, Zwgrafou");
+				page.put("city", "Athens");
+				page.put("country", "Greece");
+				json.put("page", page);
+				result = route(fakeRequest("POST", "/project/create")
+						.withJsonBody(json).withSession("user",
+								user.getDbId().toString()));
+				DB.getUserDAO().makeTransient(user);
+				System.out.println(contentAsString(result));
+				//JsonElement el = parser.parse(contentAsString(result));
+				//System.out.println(gson.toJson(el));
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Run the Result deleteGroup(String) method test
+	 */
+	//@Test
+	public void testDeleteGroup() {
+		UserGroup parentGroup = new UserGroup();
+		DB.getUserGroupDAO().makePermanent(parentGroup);
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("DELETE", "/group/"
+						+ parentGroup.getDbId()));
+				assertThat(status(result)).isEqualTo(OK);
+
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
+			}
+		});
+
+	}
+
+	/**
+	 * Run the Result editGroup(String) method test
+	 */
+	//@Test
+	public void testEditGroup() {
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				final ObjectNode json = Json.newObject();
+				final ObjectNode page = Json.newObject();
+				ObjectId userId = UserDAOTest.createTestUser();
+				ObjectId orgId = UserGroupDAOTest
+						.createTestOrganization(userId);
+				json.put("username", "testGroup" + TestUtils.randomString()
+						+ TestUtils.randomString() + TestUtils.randomString());
+				json.put("description", "This is a test group");
+				page.put("address", "Hrwwn Polutexneiou 2, Zwgrafou");
+				page.put("city", "Athens");
+				page.put("country", "Greece");
+				json.put("page", page);
+				Result result = route(fakeRequest("PUT",
+						"/group/" + orgId.toString()).withJsonBody(json)
+						.withSession("user", userId.toString()));
+				System.out.println(contentAsString(result));
+			}
+		});
+	}
+
+	@Test
+	public void testGetDescendantGroups() {
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				// Make test groups
+				ObjectId userId = UserDAOTest.createTestUser();
+				ObjectId group1 = UserGroupDAOTest.createTestUserGroup(userId);
+				Result result = route(fakeRequest(GET,
+						"/group/descendantGroups/" + group1.toString()));
+				JsonParser parser = new JsonParser();
+				JsonArray res = parser.parse(contentAsString(result))
+						.getAsJsonArray();
+				assertThat(res.size()).isEqualTo(0);
+				UserGroupDAOTest.createChildGroup(group1);
+				result = route(fakeRequest(GET,
+						"/group/descendantGroups/" + group1.toString()));
+				res = parser.parse(contentAsString(result))
+						.getAsJsonArray();
+				assertThat(res.size()).isEqualTo(1);
+				UserGroupDAOTest.createChildGroup(group1);
+				result = route(fakeRequest(GET,
+						"/group/descendantGroups/" + group1.toString()));
+				res = parser.parse(contentAsString(result))
+						.getAsJsonArray();
+				System.out.println(contentAsString(result));
+				assertThat(res.size()).isEqualTo(2);
+			}
+		});
+	}
+
+	@Test
+	public void testAddFeatured() {
+		running(fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+
+				ObjectId groupId  = new ObjectId("560be4c3e4b0d93b055f929b");
+
+				// unsupported cast
+				ObjectNode json_inp =  Json.newObject();
+				json_inp.put("fCollections", "");
+				json_inp.put("fExhibitions", "");
+				Result result = route(fakeRequest(POST,
+						"/group/560be4c3e4b0d93b055f929b/addFeatured").withJsonBody(json_inp));
+				JsonParser parser = new JsonParser();
+				JsonObject res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("error")).isEqualTo("Bad value on json fields 'fCollection' or 'fExhibitions'");
+
+
+				// unsupported cast
+				json_inp =  Json.newObject();
+				json_inp.putArray("fCollections");
+				json_inp.putArray("fExhibitions");
+				result = route(fakeRequest(POST,
+						"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+				parser = new JsonParser();
+				res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("error")).isEqualTo("Nothing to update!");
+
+
+				// add featured
+				json_inp =  Json.newObject();
+				json_inp.putArray("fCollections").add("5731d59f78635e449045b3be").add("5731d59f78635e449045b3ae");
+				json_inp.putArray("fExhibitions").add("5731d59f78635e449045b3be");
+				result = route(fakeRequest(POST,
+						"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+				parser = new JsonParser();
+				res = parser.parse(contentAsString(result))
+						.getAsJsonObject();
+				assertThat(res.get("success")).isEqualTo("Featured Data succesfully updated!");
+			}
+		});
+	}
+
+	@Test
+	public void testRemoveFeatured() {
+			ObjectId groupId  = new ObjectId("560be4c3e4b0d93b055f929b");
+
+			// unsupported cast
+			ObjectNode json_inp =  Json.newObject();
+			json_inp.put("fCollections", "");
+			json_inp.put("fExhibitions", "");
+			Result result = route(fakeRequest(POST,
+					"/group/560be4c3e4b0d93b055f929b/addFeatured").withJsonBody(json_inp));
+			JsonParser parser = new JsonParser();
+			JsonObject res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("error")).isEqualTo("Bad value on json fields 'fCollection' or 'fExhibitions'");
+
+
+			// unsupported cast
+			json_inp =  Json.newObject();
+			json_inp.putArray("fCollections");
+			json_inp.putArray("fExhibitions");
+			result = route(fakeRequest(POST,
+					"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+			parser = new JsonParser();
+			res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("error")).isEqualTo("Nothing to update!");
+
+
+			// add featured
+			json_inp =  Json.newObject();
+			json_inp.putArray("fCollections").add("5731d59f78635e449045b3be").add("5731d59f78635e449045b3ae");
+			json_inp.putArray("fExhibitions").add("5731d59f78635e449045b3be");
+			result = route(fakeRequest(POST,
+					"/group/" + groupId + "/" + "addFeatured").withJsonBody(json_inp));
+			parser = new JsonParser();
+			res = parser.parse(contentAsString(result))
+					.getAsJsonObject();
+			assertThat(res.get("success")).isEqualTo("Featured Data succesfully updated!");
+	}
+}

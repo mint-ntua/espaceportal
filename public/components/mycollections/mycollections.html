@@ -1,0 +1,391 @@
+<div role="main">
+
+<div class="container-fluid">
+	<div class="wrapper">
+		<!-- ko if: isLogged() == true  -->
+			<side-bar params="route: route"></side-bar>
+		<!-- /ko -->
+		<main>
+		  <!-- collection section-->
+		  <section class="collection">
+		  <section class="header">
+			 <!-- ko if: showsExhibitions -->
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Exhibition</span></a>
+			    <ul class="typeselect">
+                   <li class="tab active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my exhibitions">My Exhibitions</a></li>
+				  <li class="tab" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show exhibitions shared with me">Exhibitions shared with me</a></li>
+                  
+                </ul>
+			  <!-- /ko -->
+			  <!-- ko else -->
+			  
+			    <a href="#" class="new" ><span class="plus"></span><span class="text" >New Collection</span></a>
+			     <!-- ko if: showImportFromEuropeana -->
+			    <div class="picker-wrap"><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text" id="pickerTitle1">Import Collection</span><span class="arrow"></span></a>
+                  <ul aria-labelledby="picker" class="dropdown-menu">
+                    <li data-bind="click: openAction.bind($data,'importEuropeana')"><a href="#">Europeana collection</a></li>
+                    <li data-bind="click: openAction.bind($data,'importEuropeanaSearch')"><a href="#">Europeana search</a></li>
+                  </ul>
+                </div>
+                <!-- /ko -->
+                <!-- tabs-->
+                <ul class="typeselect">
+                   <li class="tab active" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show only my collections">My Collections</a></li>
+				  <li class="tab" data-bind="click: changeTab"><a href="javascript: void(0);" title="Show collections shared with me">Collections shared with me</a></li>
+                  
+                </ul>
+              <!-- /ko -->  
+			
+			 
+			</section>
+			<!-- message-->
+			 <!-- ko if: showsExhibitions -->
+			 <!-- ko if: exhibitionCount() >= 0 -->
+			 <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+			  <div class="message-body">
+				<div class="header">Welcome to My Exhibitions</div>
+				<div class="description">This is <b>My Exhibitions</b>. All exhibitions created by and shared with you will be presented here.</div>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
+			  </div>
+			 </section>
+			  <!-- /ko -->
+			  <!-- /ko -->
+			  <!-- ko else -->
+			  <!-- ko if: collectionCount() >= 0 -->
+			  <section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+			  <div class="message-body">
+				<div class="header">Welcome to My Collections</div>
+				<div class="description">This is <b>My Collections</b>. All collections created by and shared with you will be presented here.</div>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
+			  </div>
+			  </section>
+			  <!-- /ko -->
+			  <!-- /ko -->
+			<!-- collection main-->
+			<section class="collection-list">
+			  <!-- collection main header-->
+			  <div class="list-head">
+			    <!-- item count--><span class="item-count"><!-- ko text: collectionOrExhibitionCount() --><!-- /ko --></span>
+				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
+				  <!-- dropdown-->
+				  <ul aria-labelledby="sorting" class="dropdown-menu">
+				  	<li><a href="#" data-bind="click: sortByDate">Date</a></li>
+					<li><a href="#" data-bind="click: sortByTitle">Title</a></li>
+				  </ul>
+				</div>
+				<div class="list-control">
+					<a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a>
+					<a href="#" data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a>
+				</div>
+				 <!-- search-->
+                  <div class="filtertype"><img src="img/ui/ic-mag.png" class="mag">
+                    <input type="text" placeholder="Search" class="filtertext" data-bind="value:query, valueUpdate:'keyup'" autocomplete="off"">
+                  </div>
+			  </div>
+			  <!-- listing-->
+			  <ul class="list-body grids">
+			       <!--  ko if: collectionSet()=='my' -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach:searchMyCollections()} -->
+			       <!-- /ko -->
+			       <!-- /ko -->
+			       <!--  ko ifnot: collectionSet()=='my' -->
+			       <!-- ko template: { name: 'collectionsTemplate', foreach: searchSharedCollections()} -->
+			       <!-- /ko -->
+			       <!-- /ko -->
+			  <a style="cursor:pointer;" class="loadmore"
+			  data-bind="{visible: moreCollectionData(),
+			  event: {click: moreCollections.bind($data, showsExhibitions)}}">load more
+			      <div class="left"></div>
+                  <div class="right"></div>
+                  <div class="top"></div>
+                  <div class="bot"></div>
+              </a>
+			  </ul>
+			</section>
+			<section class="action edit">
+			  <div class="action-header">
+			  	<!-- ko if: showsExhibitions -->
+				<div class="title">Edit Exhibition</div>
+				<!-- /ko -->
+			    <!-- ko else -->
+			    <div class="title">Edit Collection</div>
+			    <!-- /ko -->
+			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
+			  <div class="action-body" data-bind="validationElement: titleToEdit">
+				<input type="text" data-bind="{value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true
+				      attr: {placeholder: titleToEdit}}">
+				  </input>
+				<textarea data-bind="{value: descriptionToEdit, valueUpdate: 'afterkeypress', hasFocus: false
+				      attr: {placeholder: descriptionToEdit}}"></textarea>
+			  </div>
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a class="btn-green" data-bind="click: editCollection">Save collection</a>
+			  </div>
+			</section>
+			<!-- collection new-->
+			<section class="action new">
+			  <div class="action-header">
+			  	<!-- ko if: showsExhibitions -->
+				<div class="title">New Exhibition</div>
+				<!-- /ko -->
+			    <!-- ko else -->
+			    <div class="title">New Collection</div>
+			    <!-- /ko -->
+				<div class="toggle">
+				  <input type="checkbox" id="toggle2" data-bind="checked: isPublicToEdit">
+				  <label for="toggle2" ></label><span class="private">private</span>
+				  <span class="public">public</span>
+				</div>
+			  </div>
+			  <div class="action-body">
+			  	<div class="form-group" data-bind="validationElement: titleToEdit">
+				  	<!-- ko if: showsExhibitions -->
+					<input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your exhibition">
+					<!-- /ko -->
+				    <!-- ko else -->
+				    <input type="text" data-bind="value: titleToEdit, valueUpdate: 'afterkeypress', hasFocus: true" placeholder="Name your collection">
+					<!-- /ko -->
+				</div>
+				<textarea rows="10" placeholder="Description" data-bind="value: descriptionToEdit"></textarea>
+			  </div>
+			  <!-- ko if: showsExhibitions -->
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a href="#" class="btn-green" data-bind="click: createCollection.bind($data, 'Exhibition')">Create and go to editor</a>
+			  	</div>
+			   <!-- /ko -->
+			    <!-- ko else -->
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			    <a data-bind="click: createCollection.bind($data, 'SimpleCollection')" class="btn-green">Create collection</a>
+			   </div>
+			    <!-- /ko -->
+			</section>
+			
+			<!-- import collection -->
+
+				<section class="action importEuropeana">
+					<div class="action-header">
+						<div class="title">Import Europeana Collection</div>
+					</div>
+					<div class="action-body">
+
+						<div>
+							<input type="text"
+								data-bind="value: europeanaID, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana collection ID">
+						</div>
+					</div>
+					<div class="button-group">
+						<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a data-bind="click: importEuropeanaCollection " class="btn-green">Import</a>
+					</div>
+
+
+				</section>
+				
+				<section class="action importEuropeanaSearch">
+					<div class="action-header">
+						<div class="title">Import Europeana Search</div>
+					</div>
+					<div class="action-body">
+
+						<div>
+							<input type="text"
+								data-bind="value: importCollectionName, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Collection Name">
+
+						</div>
+						<div>
+							<input type="text"
+								data-bind="value: europeanaSearch, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana Search Term">
+						</div>
+						
+						<div>
+							<input type="text"
+								data-bind="value: europeanaSearchTail, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Europeana Query Tail">
+						</div>
+						
+						<div>
+							<input type="text"
+								data-bind="value: europeanaLimit, valueUpdate: 'afterkeypress', hasFocus: true"
+								placeholder="Import Limit (-1 means no limit)">
+						</div>
+					</div>
+					<div class="button-group">
+						<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+						<a data-bind="click: importEuropeanaSearch " class="btn-green">Import</a>
+					</div>
+
+				</section>
+				
+
+				<!-- collection give access-->
+			<section class="action access">
+			  <div class="action-header">
+				<div class="title">Give access to users and user groups</div>
+			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
+			  <div class="action-body">
+				<div class="group">
+				  <div class="title">Users access</div>
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, forUsers:true" placeholder="Start typing username or email">
+				  <ul class="access-list">
+				  	<!-- ko foreach: usersToShare -->
+					<li>
+					  <!-- ko if: $data.image -->
+					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <!--/ko-->
+					  <!-- ko else -->
+					  	<div class="thumbnails"><img src="images/user.png"></div>
+					  <!-- /ko -->
+
+					  <a style="cursor: pointer;" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  <i class="fa fa-trash"></i></a>
+					  <div class="toggle">
+						<input type="checkbox" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind = "{attr: {for: username}}"></label>
+						<span class="private">view</span>
+						<span class="public">co-edit</span>
+					  </div>
+					</li>
+					<!-- /ko -->
+				  </ul>
+				</div>
+				<div class="group">
+				  <div class="title">Groups access</div>
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, forUsers:false, forGroupType:'UserGroup'" placeholder="Start typing group name">
+				  <ul class="access-list" data-bind="foreach: userGroupsToShare">
+				  	<li class="blue">
+					    <span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
+						<a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
+					  <div class="toggle">
+						<input type="checkbox" id="u2" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind="{attr: {for: username}}"></label>
+						<span class="private">view</span>
+						<span class="public">co-edit</span>
+					  </div>
+					</li>
+				  </ul>
+				</div>
+			  </div>
+			  <div class="button-group">
+			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
+			  </div>
+
+
+			   <script type="text/html" id="collectionsTemplate">
+			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
+				  <div class="thumbnails">
+				  	<a href="#" data-bind="attr: {href: $parent.showsExhibitions? (administrative.entryCount() > 0? 'index.html#exhibitionview/'+dbId(): 'index.html#exhibition-edit/'+dbId()): 'index.html#collectionview/'+dbId()}" title="view"> 
+				  	<div class="counter" data-bind="text: itemCount()"> Items</div>
+					<!-- ko if: administrative.access.isPublic()-->
+					<div class="category">public</div>
+					<!--/ko-->
+					<!-- ko else -->
+					<div class="category">private</div>
+					<!--/ko-->
+					<!-- ko if: backgroundImg() != "" -->
+						<div class="wrap"><img data-bind="attr: {src: backgroundImg}" onError="this.src='img/ui/ic-noimage.png'"/></div>
+						<!-- ko if: media()[0]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/ui/ic-noimage.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+					<!-- /ko -->
+					<!-- ko else -->
+						<!-- ko if: media()[0]-->
+						<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}" onError="this.src='img/ui/ic-noimage.png'"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[1]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+						<!-- ko if: media()[2]-->
+						<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
+						<!-- /ko -->
+						<!-- ko else -->
+						<div class="wrap small"></div>
+						<!-- /ko -->
+					<!-- /ko -->
+					</a>
+				  </div>
+				  <div class="meta">
+				  	<!-- ko if: $parent.showsExhibitions -->
+				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header truncate"></a>
+				  	<!-- /ko -->
+					<!-- ko else -->
+					<a data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}" class="header truncate"></a>
+					<!-- /ko -->
+					<!-- ko if: (description() == "") -->
+					<br>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="truncate" data-bind="text: description()"></div>
+					<!-- /ko -->
+					<div class="other-info">
+					  <div class="date" data-bind="text: date()"></div>
+					  <div class="user"data-bind="text: creatorName()"></div>
+					</div>
+					<div class="action-group"><div class="wrap">
+                          <ul>  
+						<!--  ko if: myAccess() ==  "OWN" -->
+						<!-- ko if: $parent.showsExhibitions -->
+						<li><a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a></li>
+						<li><a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a></li>
+						<!-- /ko -->
+						<!-- ko else -->
+						<li><a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a></li>
+						<li><a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a></li>
+						<!-- /ko -->
+						<!-- /ko -->
+						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
+						<li><a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit" class="fa fa-pencil editaction"></a></li>
+						<!-- /ko -->
+						</ul>
+					</div>
+
+					</div>
+				  </div>
+				</li>
+			  </script>
+
+			</section>
+		  </section>
+		</main>
+	</div>
+</div>
+</div>
